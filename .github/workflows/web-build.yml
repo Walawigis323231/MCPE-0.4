@@ -1,0 +1,19 @@
+name: Build web version
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: sudo apt-get update && sudo apt-get install -y python3-pip python3-tk cmake ninja-build
+      - run: pip3 install lief
+      - run: python3 tools/extract_apk.py Minecraft-PE-0-4-0.apk
+      - run: chmod +x platforms/emscripten/build.sh && ./platforms/emscripten/build.sh
+      - run: cp -r game/assets wasm/dist/ || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: game
+          path: wasm/dist
